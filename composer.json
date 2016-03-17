@@ -1,0 +1,27 @@
+{
+  "name": "pierrelemee/mfl-parser",
+  "description": "MFL file parser",
+  "type": "library",
+  "license": "GPL-3.0+",
+  "keywords" : [
+    "mfl", "parser"
+  ],
+  "version": "0.0.1",
+  "authors": [
+    {
+      "name": "Pierre Lemée",
+      "email": "pierre@pierrelemee.fr",
+      "homepage": "http://www.pierrelemee.fr",
+      "role": "Developer"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "": "src/",
+      "PierreLemee":   "src/PierreLemee"
+    }
+  },
+  "require": {
+    "php": ">=5.3.3"
+  }
+}
