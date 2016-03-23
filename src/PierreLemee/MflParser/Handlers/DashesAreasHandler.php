@@ -15,11 +15,6 @@ class DashesAreasHandler extends AbstractHandler
 
     public function processEntry($key, $value, GridFile $file)
     {
-        /*
-        $index = intval(substr($key, strlen(self::PREFIX)));
-        $row = (int) ($index / $gridfile->getWidth()) + ($index % $gridfile->getWidth() === 0 ? 0 : 1);
-        $column = $index % $gridfile->getWidth() === 0 ? $gridfile->getWidth() : $index % $gridfile->getWidth();
-        $gridfile->getCell($row, $column)->setDashes(intval($value));
-        */
+        $file->addDashes(intval(substr($key, strlen(self::PREFIX))), (int) $value);
     }
 } 

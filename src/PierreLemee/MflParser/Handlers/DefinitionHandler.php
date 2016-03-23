@@ -15,7 +15,7 @@ class DefinitionHandler extends AbstractHandler
 
     public function processEntry($key, $value, GridFile $file)
     {
-        $file->addDefinition($value, $this->getDefinitionIndex($key));
+        $file->addDefinition(preg_replace("/\n/", "//", $value), $this->getDefinitionIndex($key));
     }
 
     protected function getDefinitionIndex($key)

@@ -68,13 +68,13 @@ class MflParsing
                         $this->column = 1;
                     } else {
                         $this->column++;
-                        if ($char === "=") {
-                            $this->state->readEquals($this);
-                        } else if ($char === "&") {
-                            $this->state->readAmpersand($this);
-                        } else {
-                            $this->state->readCharacter($char);
-                        }
+                    }
+                    if ($char === "=") {
+                        $this->state->readEquals($this);
+                    } else if ($char === "&") {
+                        $this->state->readAmpersand($this);
+                    } else {
+                        $this->state->readCharacter($char);
                     }
                 }
             } catch (\Exception $e) {

@@ -20,8 +20,7 @@ class RowHandler extends AbstractHandler
      */
     public function processEntry($key, $value, GridFile $file)
     {
-        //if (sizeof($rows) > 0 && strlen($value) !== strlen($rows[sizeof($rows)])) {
-        $file->addRow($value, $this->getRowIndex($key));
+        $file->addRow(preg_replace("/\n/", "", $value), $this->getRowIndex($key));
     }
 
     protected function getRowIndex($key)
