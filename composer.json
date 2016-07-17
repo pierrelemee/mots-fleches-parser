@@ -6,7 +6,7 @@
   "keywords" : [
     "mfl", "parser"
   ],
-  "version": "0.0.1",
+  "version": "0.1.0",
   "authors": [
     {
       "name": "Pierre Lemée",
@@ -18,7 +18,7 @@
   "autoload": {
     "psr-0": {
       "": "src/",
-      "PierreLemee":   "src/PierreLemee"
+      "PierreLemee": "src/PierreLemee"
     }
   },
   "require": {
