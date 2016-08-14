@@ -16,7 +16,7 @@ class LevelsHandler extends AbstractHandler
 
     public function processEntry($key, $value, GridFile $file)
     {
-        $file->setLevels($this->getLevels(preg_replace("/\n/", "", $value)));
+        $file->addLevels($this->getLevels(preg_replace("/\n/", "", $value)));
     }
 
     protected function getLevels($value)
