@@ -32,8 +32,6 @@ class MflParser
         } else {
             throw new MflParserException(0, 0, sprintf("No such file '%s'", $filename));
         }
-
-
     }
 
     /**

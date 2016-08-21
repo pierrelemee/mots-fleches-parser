@@ -7,9 +7,11 @@ use Exception;
 class GridFile
 {
     protected $filename;
+    protected $force;
     protected $rows;
     protected $definitions;
     protected $levels;
+    protected $pictures;
     protected $dashes;
 
     public function __construct($filename)
@@ -18,6 +20,7 @@ class GridFile
         $this->rows = array();
         $this->definitions = array();
         $this->levels = array();
+        $this->pictures = "";
         $this->dashes = array();
     }
 
@@ -34,6 +37,22 @@ class GridFile
     public function getHeight()
     {
         return sizeof($this->rows);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getForce()
+    {
+        return $this->force;
+    }
+
+    /**
+     * @param mixed $force
+     */
+    public function setForce($force)
+    {
+        $this->force = $force;
     }
 
     public function addRow($row, $index)
@@ -90,6 +109,14 @@ class GridFile
         return $this->levels;
     }
 
+    /**
+     * @param string $pictures
+     */
+    public function setPictures($pictures)
+    {
+        $this->pictures = $pictures;
+    }
+
     public function addDashes($index, $value)
     {
         if (!isset($this->dashes[$index])) {
@@ -114,6 +141,16 @@ class GridFile
     public function getCell($x, $y)
     {
         return $x >= 0 && $x < $this->getWidth() && $y >= 0 && $y < $this->getHeight() ? $this->rows[$y]{$x} : null;
+    }
+
+    /**
+     * @param $x
+     * @param $y
+     * @return boolean
+     */
+    public function isPicture($x, $y)
+    {
+        return ($y * $this->getWidth() + $x) < strlen($this->pictures) && $this->pictures{$y * $this->getWidth() + $x} == "1";
     }
 
     public function __toString()

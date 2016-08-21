@@ -21,6 +21,46 @@ class Grid implements \JsonSerializable
         $this->cells = [];
     }
 
+    /**
+     * @return int
+     */
+    public function getWidth()
+    {
+        return $this->width;
+    }
+
+    /**
+     * @return int
+     */
+    public function getHeight()
+    {
+        return $this->height;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getForce()
+    {
+        return $this->force;
+    }
+
+    /**
+     * @param mixed $force
+     */
+    public function setForce($force)
+    {
+        $this->force = $force;
+    }
+
+    /**
+     * @return AbstractCell[]
+     */
+    public function getCells()
+    {
+        return $this->cells;
+    }
+
     public function addCell(AbstractCell $cell)
     {
         $this->cells[] = $cell;
@@ -31,6 +71,7 @@ class Grid implements \JsonSerializable
     function jsonSerialize()
     {
         return [
+            'force'  => $this->force,
             'width'  => $this->width,
             'height' => $this->height,
             'cells'  => $this->cells
@@ -45,12 +86,13 @@ class Grid implements \JsonSerializable
     public static function fromGridFile(GridFile $gridFile)
     {
         $grid = new Grid();
+        $grid->setForce($gridFile->getForce());
         $index = 1;
 
         for ($y = 0; $y < $gridFile->getHeight(); $y++) {
             for ($x = 0; $x < $gridFile->getWidth(); $x++) {
                 $value = $gridFile->getCell($x, $y);
-                if ($value === strtolower($value)) {
+                if ($value === strtolower($value) && !$gridFile->isPicture($x, $y)) {
                     $clues = [];
                     $arrows = Arrow::getArrows($value);
                     if (sizeof($arrows) == 0) {

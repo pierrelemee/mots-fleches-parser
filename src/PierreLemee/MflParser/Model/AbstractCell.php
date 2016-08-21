@@ -46,6 +46,14 @@ abstract class AbstractCell implements \JsonSerializable
     public abstract function getType();
 
     /**
+     * @return Clue[]
+     */
+    public function getClues()
+    {
+        return array();
+    }
+
+    /**
      * @return array
      */
     public abstract function getContent();

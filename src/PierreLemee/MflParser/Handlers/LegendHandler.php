@@ -2,6 +2,7 @@
 
 namespace PierreLemee\MflParser\Handlers;
 
+use PierreLemee\MflParser\Exceptions\MflParserException;
 use PierreLemee\MflParser\Model\GridFile;
 
 class LegendHandler extends AbstractHandler
@@ -13,16 +14,14 @@ class LegendHandler extends AbstractHandler
 
     public function processEntry($key, $value, GridFile $file)
     {
-        /*
         if(preg_match("/^F[1-9]/", $value)){
-            $gridfile->setLevel(intval($value{1}));
+            $file->setForce(intval($value{1}));
         }
         else if(preg_match("/Force [1-9]/", $value)){
-            $gridfile->setLevel(intval($value{strpos($value, "Force ") + strlen("Force ")}));
+            $file->setForce(intval($value{strpos($value, "Force ") + strlen("Force ")}));
         }
         else {
-            throw new GridParserException("Unable to detect grid level in '$value'");
+            throw new MflParserException(0, 0, "Unable to detect grid level in '$value'");
         }
-        */
     }
 } 
