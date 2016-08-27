@@ -43,7 +43,7 @@ class Arrow
             self::$VALUES = [
                 self::RIGHT_BOTTOM => new Arrow(self::RIGHT_BOTTOM, "cjklmntuvwx", 1, 0, 0, 1),
                 self::RIGHT        => new Arrow(self::RIGHT, "aefghiopqrs", 1, 0, 1, 0),
-                self::BOTTOM       => new Arrow(self::BOTTOM, "bfghimk", 0, 1, 0, 1),
+                self::BOTTOM       => new Arrow(self::BOTTOM, "bfghimkl", 0, 1, 0, 1),
                 self::BOTTOM_RIGHT => new Arrow(self::BOTTOM_RIGHT, "dopqrstuvwx", 0, 1, 1, 0),
                 self::LEFT_BOTTOM  => new Arrow(self::LEFT_BOTTOM, "z", -1, 0, 0, 1)
             ];
