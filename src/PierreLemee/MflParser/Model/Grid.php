@@ -92,7 +92,10 @@ class Grid implements \JsonSerializable
         for ($y = 0; $y < $gridFile->getHeight(); $y++) {
             for ($x = 0; $x < $gridFile->getWidth(); $x++) {
                 $value = $gridFile->getCell($x, $y);
-                if ($value === strtolower($value) && !$gridFile->isPicture($x, $y)) {
+                if ($gridFile->isPicture($x, $y)) {
+                    $grid->addCell(new PictureCell($x, $y));
+                }
+                else if ($value === strtolower($value)) {
                     $clues = [];
                     $arrows = Arrow::getArrows($value);
                     if (sizeof($arrows) == 0) {

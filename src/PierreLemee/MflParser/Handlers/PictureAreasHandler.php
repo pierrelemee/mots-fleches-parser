@@ -13,7 +13,7 @@ class PictureAreasHandler extends AbstractHandler
 
     public function processEntry($key, $value, GridFile $file)
     {
-        $file->setPictures($value);
+        $file->setPictures(preg_replace("/\n/", "", $value));
     }
 
 }

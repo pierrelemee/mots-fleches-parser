@@ -150,7 +150,7 @@ class GridFile
      */
     public function isPicture($x, $y)
     {
-        return ($y * $this->getWidth() + $x) < strlen($this->pictures) && $this->pictures{$y * $this->getWidth() + $x} == "1";
+        return ($value = substr($this->pictures, $y * $this->getWidth() + $x, 1)) ? $value === "1" : false;
     }
 
     public function __toString()
