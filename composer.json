@@ -1,12 +1,14 @@
 {
   "name": "pierrelemee/mfl-parser",
-  "description": "MFL file parser",
   "type": "library",
-  "license": "GPL-3.0+",
+  "description": "MFL file parser",
   "keywords" : [
-    "mfl", "parser"
+    "mfl",
+    "parser"
   ],
-  "version": "0.1.0",
+  "homepage": "http://www.pierrelemee.fr",
+  "license": "GPL-3.0+",
+  "version": "0.2.0",
   "authors": [
     {
       "name": "Pierre Lemée",

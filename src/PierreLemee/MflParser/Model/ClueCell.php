@@ -17,6 +17,12 @@ class ClueCell extends AbstractCell
         return AbstractCell::CELL_TYPE_CLUE;
     }
 
+    public function getClues()
+    {
+        return $this->clues;
+    }
+
+
     public function getContent()
     {
         return $this->clues;

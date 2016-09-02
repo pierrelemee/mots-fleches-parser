@@ -7,12 +7,12 @@ use Exception;
 class GridFile
 {
     protected $filename;
-    protected $width;
-    protected $height;
-    protected $level;
+    protected $force;
     protected $rows;
     protected $definitions;
     protected $levels;
+    protected $pictures;
+    protected $dashes;
 
     public function __construct($filename)
     {
@@ -20,45 +20,62 @@ class GridFile
         $this->rows = array();
         $this->definitions = array();
         $this->levels = array();
+        $this->pictures = "";
         $this->dashes = array();
+    }
+
+    public function getFileHandler()
+    {
+        return fopen($this->filename, 'r');
     }
 
     public function getWidth()
     {
-        return isset($this->rows[0]) ? sizeof($this->rows[0]) : null;
+        return isset($this->rows[0]) ? strlen($this->rows[0]) : 0;
     }
 
     public function getHeight()
     {
-        return null !== $this->rows ? sizeof($this->rows) : null;
+        return sizeof($this->rows);
     }
 
-    public function setLevel($level)
+    /**
+     * @return mixed
+     */
+    public function getForce()
     {
-        $this->level = $level;
+        return $this->force;
     }
 
-    public function setLevels(array $levels)
+    /**
+     * @param mixed $force
+     */
+    public function setForce($force)
     {
-        $this->levels = $levels;
+        $this->force = $force;
     }
 
     public function addRow($row, $index)
     {
-        if($this->getWidth() === null || $this->getWidth() === strlen($row)){
+        if($this->getWidth() === 0 || $this->getWidth() === strlen($row)){
             if(($index) > sizeof($this->rows)){
-                $this->rows[($index - 1)] = [];
-                foreach(str_split($row) as $letter){
-                    $this->rows[($index - 1)][sizeof($this->rows[$index - 1])] = $letter;
-                }
+                $this->rows[($index - 1)] = $row;
             }
             else{
                 throw new Exception("Can't add row #$index before row {($index)}");
             }
         }
         else{
-            throw new Exception("Row #$index ($row) doesn't fit with Grid width $this->width");
+            throw new Exception("Row #$index ($row) doesn't fit with Grid width {$this->getWidth()}");
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getRows()
+    {
+        return $this->rows;
     }
 
     public function addDefinition($definition, $index)
@@ -71,6 +88,35 @@ class GridFile
         }
     }
 
+    /**
+     * @return array
+     */
+    public function getDefinitions()
+    {
+        return $this->definitions;
+    }
+
+    public function addLevels(array $levels)
+    {
+        $this->levels = $levels;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLevels()
+    {
+        return $this->levels;
+    }
+
+    /**
+     * @param string $pictures
+     */
+    public function setPictures($pictures)
+    {
+        $this->pictures = $pictures;
+    }
+
     public function addDashes($index, $value)
     {
         if (!isset($this->dashes[$index])) {
@@ -80,65 +126,31 @@ class GridFile
     }
 
     /**
-     * @param $row
-     * @param $column
+     * @return array
      */
-    public function getCell($row, $column)
+    public function getDashes()
     {
-        return $row > 0 && $row <= $this->getHeight() && $column > 0 && $column <= $this->getWidth() ? $this->rows[$row][$column] : null;
+        return $this->dashes;
     }
 
-    public function getGrid()
+    /**
+     * @param $x
+     * @param $y
+     * @return AbstractCell
+     */
+    public function getCell($x, $y)
     {
-        if (sizeof($this->definitions) !== sizeof($this->levels)) {
-            throw new Exception(sprintf("Number of definitions (%d) and levels (%d) doesn't match", sizeof($this->definitions), sizeof($this->levels)));
-        }
+        return $x >= 0 && $x < $this->getWidth() && $y >= 0 && $y < $this->getHeight() ? $this->rows[$y]{$x} : null;
+    }
 
-        $grid = new Grid();
-        $index = 1;
-
-        for ($i = 0; $i < $this->getHeight(); $i++) {
-            for ($j = 0; $j < $this->getWidth(); $j++) {
-                if ($this->rows[$i][$j] === strtolower($this->rows[$i][$j])) {
-                    $clues = [];
-                    foreach(Arrow::getArrows($this->rows[$i][$j]) as $arrow) {
-                        $clues[] = new Clue($this->definitions[$index], $this->levels[$index], $arrow);
-                        $index++;
-                    }
-                    $grid->addCell(new ClueCell($i, $j, $clues));
-                } else {
-                    $grid->addCell(new LetterCell($i, $j, $this->rows[$i][$j], isset($this->dashes[$i * sizeof($this->rows[0]) + $j + 1]) ? $this->dashes[$i * sizeof($this->rows[0]) + $j + 1] : []));
-                }
-
-
-                /*
-
-                if ($this->getCell($i, $j)->isDefinitionToken()) {
-                    foreach ($this->getCell($i, $j)->getDefinitionToken()->getDirections() as $direction) {
-                        $dashed = "";
-                        $row = ($i + $direction->getRow());
-                        $column = ($j + $direction->getColumn());
-                        while (($cell = $this->getCell($row, $column)) != null && !$cell->isDefinitionToken() && !$cell->hasPicture()) {
-                            $dashed .= $cell->getLetter();
-                            if(($cell->getDashes() === GridFileCell::DASHES_VERTICAL && $direction->isVertical()) || ($cell->getDashes() === GridFileCell::DASHES_HORIZONTAL && !$direction->isVertical())){
-                                $dashed .= GridFileCell::DASH;
-                            }
-                            $row = $direction->getNextRow($row);
-                            $column = $direction->getNextColumn($column);
-                        }
-                        $grid->addWord($this->getWord($dashed, $this->definitions[sizeof($grid->getWords()) + 1], $this->levels[sizeof($grid->getWords())]));
-                    }
-                }
-                */
-
-            }
-        }
-        /*
-        if (sizeof($this->definitions) != sizeof($grid->getWords())) {
-            throw new Exception(sprintf("File '%s': Number of definitions (%d) and words (%d) doesn't match", $this->filename, sizeof($this->definitions), sizeof($grid->getWords())));
-        }
-        */
-        return $grid;
+    /**
+     * @param $x
+     * @param $y
+     * @return boolean
+     */
+    public function isPicture($x, $y)
+    {
+        return ($value = substr($this->pictures, $y * $this->getWidth() + $x, 1)) ? $value === "1" : false;
     }
 
     public function __toString()
