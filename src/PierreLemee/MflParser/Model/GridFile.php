@@ -24,6 +24,11 @@ class GridFile
         $this->dashes = array();
     }
 
+    public function getExtension()
+    {
+        return ($index = strrpos($this->filename, ".")) ? substr($this->filename, $index + 1) : $this->filename;
+    }
+
     public function getFileHandler()
     {
         return fopen($this->filename, 'r');

@@ -1,7 +1,8 @@
 <?php
 
-namespace PierreLemee\MflParser\Handlers;
+namespace PierreLemee\MflParser\Readers\Handlers\Mfl;
 
+use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
 use PierreLemee\MflParser\Model\GridFile;
 
 class RowHandler extends AbstractHandler

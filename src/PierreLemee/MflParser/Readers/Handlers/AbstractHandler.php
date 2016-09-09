@@ -1,6 +1,6 @@
 <?php
 
-namespace PierreLemee\MflParser\Handlers;
+namespace PierreLemee\MflParser\Readers\Handlers;
 
 use PierreLemee\MflParser\Model\GridFile;
 

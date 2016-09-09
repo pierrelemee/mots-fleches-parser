@@ -7,17 +7,13 @@ use PierreLemee\MflParser\Model\GridFile;
 use PierreLemee\MflParser\Handlers\AbstractHandler;
 use Exception;
 use PierreLemee\MflParser\Exceptions\MflParserException;
+use PierreLemee\MflParser\Readers\MflReader;
 
 class MflParser
 {
     const STATE_UNDEFINED = 0;
     const STATE_KEY       = 1;
     const STATE_VALUE     = 2;
-
-    /**
-     * @var AbstractHandler[]
-     */
-    private static $HANDLERS;
 
     /**
      * @param $filename string
@@ -44,9 +40,13 @@ class MflParser
         $file = new GridFile($filename);
 
         $source = $file->getFileHandler();
+        $reader = self::getReaderForFile($file);
+
+        if (null === $reader) {
+
+        }
         $x = 1;
         $y = 1;
-        $buffer = $key = $value = "";
 
         try {
             while (($character = fgetc($source)) !== false) {
@@ -56,18 +56,8 @@ class MflParser
                 } else {
                     $y++;
                 }
-                if ($character === "=") {
-                    $key = $buffer;
-                    $buffer = "";
-                } else if ($character === "&") {
-                    $value = $buffer;
-                    if (null !== $handler = self::getHandlerForKey($key)) {
-                        $handler->processEntry($key, $value, $file);
-                    } // TODO: throw exception otherwise in strict mode
-                    $buffer = "";
-                } else {
-                    $buffer .= $character;
-                }
+                $reader->readGridFileCharacter($file, $character);
+
             }
         } catch (Exception $e) {
             //echo $e->getTraceAsString();
@@ -82,36 +72,18 @@ class MflParser
         return $file;
     }
 
-    private static function initializeHandlers()
-    {
-        // Handlers initialization
-        if (null === self::$HANDLERS) {
-            self::$HANDLERS = [];
-            foreach (scandir(__DIR__ . "/Handlers") as $file) {
-                if ("AbstractHandler.php" !== $file && preg_match("/Handler\\.php$/", $file)) {
-                    include_once __DIR__ . "/Handlers/" . $file;
-                    $classname = "\\PierreLemee\\MflParser\\Handlers\\" . preg_replace("/Handler\\.php$/", "Handler", $file);
-                    $class = new $classname;
-                    if ($class instanceof AbstractHandler) {
-                        self::$HANDLERS[] = $class;
-                    }
-                }
-            }
-        }
-    }
-
     /**
-     * @param $key
-     * @return AbstractHandler
+     * @param GridFile $file
+     *
+     * @return MflReader
      */
-    private static function getHandlerForKey($key)
+    private static function getReaderForFile(GridFile $file)
     {
-        self::initializeHandlers();
-        foreach (self::$HANDLERS as $handler) {
-            if ($handler->matches($key)) {
-                return $handler;
-            }
+        switch(strtolower($file->getExtension())) {
+            case "mfl":
+                return new MflReader($file);
         }
-        return null;
+
+        throw new MflParserException(0, 0, "Can't find appropriate reader for extension {$file->getExtension()}");
     }
 }
