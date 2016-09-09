@@ -2,7 +2,7 @@
 
 namespace PierreLemee\MflParser\Readers;
 
-use PierreLemee\MflParser\Handlers\AbstractHandler;
+use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
 use PierreLemee\MflParser\Model\GridFile;
 
 abstract class AbstractReader
@@ -22,10 +22,19 @@ abstract class AbstractReader
     }
 
     /**
+     * @return boolean
+     */
+    public abstract function handleDefinitionForce();
+
+    /**
      * @return AbstractHandler[]
      */
     public abstract function getHandlers();
 
+    /**
+     * @param $key
+     * @return AbstractHandler
+     */
     public function getHandlerForKey($key)
     {
         foreach ($this->getHandlers() as $handler) {

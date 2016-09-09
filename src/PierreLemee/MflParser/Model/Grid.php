@@ -102,7 +102,7 @@ class Grid implements \JsonSerializable
                         throw new MflParserException($x, $y, "Unable to find definitions for $value");
                     }
                     foreach ($arrows as $arrow) {
-                        $clues[] = new Clue($gridFile->getDefinitions()[$index], self::getWord($arrow, $gridFile, $x, $y), $gridFile->getLevels()[$index - 1], $arrow);
+                        $clues[] = new Clue($gridFile->getDefinitions()[$index], self::getWord($arrow, $gridFile, $x, $y), $gridFile->getLevel($index - 1), $arrow);
                         $index++;
                     }
                     $grid->addCell(new ClueCell($x, $y, $clues));

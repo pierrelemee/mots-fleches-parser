@@ -7,6 +7,8 @@ use PierreLemee\MflParser\Model\GridFile;
 use PierreLemee\MflParser\Handlers\AbstractHandler;
 use Exception;
 use PierreLemee\MflParser\Exceptions\MflParserException;
+use PierreLemee\MflParser\Readers\AbstractReader;
+use PierreLemee\MflParser\Readers\MfjReader;
 use PierreLemee\MflParser\Readers\MflReader;
 
 class MflParser
@@ -66,7 +68,7 @@ class MflParser
             fclose($source);
         }
 
-        if (sizeof($file->getDefinitions()) !== sizeof($file->getLevels())) {
+        if ($reader->handleDefinitionForce() && sizeof($file->getDefinitions()) !== sizeof($file->getLevels())) {
             throw new MflParserException($x, $y, sprintf("Number of definitions (%d) and levels (%d) doesn't match", sizeof($file->getDefinitions()), sizeof($file->getLevels())));
         }
         return $file;
@@ -75,13 +77,16 @@ class MflParser
     /**
      * @param GridFile $file
      *
-     * @return MflReader
+     * @return AbstractReader
+     * @throws MflParserException
      */
     private static function getReaderForFile(GridFile $file)
     {
         switch(strtolower($file->getExtension())) {
             case "mfl":
                 return new MflReader($file);
+            case "mfj":
+                return new MfjReader($file);
         }
 
         throw new MflParserException(0, 0, "Can't find appropriate reader for extension {$file->getExtension()}");

@@ -85,6 +85,7 @@ class GridFile
 
     public function addDefinition($definition, $index)
     {
+        var_dump($definition);
         if($index == sizeof($this->definitions) + 1){
             $this->definitions[$index] = $definition;
         }
@@ -104,6 +105,14 @@ class GridFile
     public function addLevels(array $levels)
     {
         $this->levels = $levels;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLevel($index)
+    {
+        return null !== $this->levels ? $this->levels[$index] : null;
     }
 
     /**

@@ -14,6 +14,11 @@ class MflReader extends AbstractReader
         parent::__construct($file);
     }
 
+    public function handleDefinitionForce()
+    {
+        return true;
+    }
+
     public function getHandlers()
     {
         if (null === self::$HANDLERS) {
@@ -27,7 +32,7 @@ class MflReader extends AbstractReader
         // Handlers initialization
         self::$HANDLERS = [];
         foreach (scandir(__DIR__ . "/Handlers/Mfl/") as $file) {
-            if ("AbstractHandler.php" !== $file && preg_match("/Handler\\.php$/", $file)) {
+            if (preg_match("/Handler\\.php$/", $file)) {
                 include_once __DIR__ . "/Handlers/Mfl/" . $file;
                 $classname = "\\PierreLemee\\MflParser\\Readers\\Handlers\\Mfl\\" . preg_replace("/Handler\\.php$/", "Handler", $file);
                 $class = new $classname;
