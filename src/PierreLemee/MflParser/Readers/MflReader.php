@@ -2,8 +2,8 @@
 
 namespace PierreLemee\MflParser\Readers;
 
-use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
 use PierreLemee\MflParser\Model\GridFile;
+use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
 
 class MflReader extends AbstractReader
 {

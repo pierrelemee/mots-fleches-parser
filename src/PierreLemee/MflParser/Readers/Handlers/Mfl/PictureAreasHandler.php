@@ -2,8 +2,8 @@
 
 namespace PierreLemee\MflParser\Readers\Handlers\Mfl;
 
-use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
 use PierreLemee\MflParser\Model\GridFile;
+use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
 
 class PictureAreasHandler extends AbstractHandler
 {
@@ -14,7 +14,11 @@ class PictureAreasHandler extends AbstractHandler
 
     public function processEntry($key, $value, GridFile $file)
     {
-        $file->setPictures(preg_replace("/\n/", "", $value));
+        foreach (str_split(preg_replace("/\n/", "", $value)) as $index => $char) {
+            if ($char === "1") {
+                $file->addPicture($index % $file->getWidth(), floor($index / $file->getWidth()));
+            }
+        }
     }
 
 }

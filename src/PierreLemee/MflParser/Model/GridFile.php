@@ -20,7 +20,7 @@ class GridFile
         $this->rows = array();
         $this->definitions = array();
         $this->levels = array();
-        $this->pictures = "";
+        $this->pictures = [];
         $this->dashes = array();
     }
 
@@ -85,7 +85,6 @@ class GridFile
 
     public function addDefinition($definition, $index)
     {
-        var_dump($definition);
         if($index == sizeof($this->definitions) + 1){
             $this->definitions[$index] = $definition;
         }
@@ -108,11 +107,12 @@ class GridFile
     }
 
     /**
+     * @param $index int
      * @return mixed
      */
     public function getLevel($index)
     {
-        return null !== $this->levels ? $this->levels[$index] : null;
+        return isset($this->levels[$index]) ? $this->levels[$index] : $this->force;
     }
 
     /**
@@ -124,11 +124,25 @@ class GridFile
     }
 
     /**
-     * @param string $pictures
+     * @param $x int
+     * @param $y int
      */
-    public function setPictures($pictures)
+    public function addPicture($x, $y)
     {
-        $this->pictures = $pictures;
+        if (!isset($this->pictures[$x])) {
+            $this->pictures[$x] = [];
+        }
+        $this->pictures[$x][$y] = true;
+    }
+
+    /**
+     * @param $x
+     * @param $y
+     * @return boolean
+     */
+    public function isPicture($x, $y)
+    {
+        return isset($this->pictures[$x][$y]);
     }
 
     public function addDashes($index, $value)
@@ -155,16 +169,6 @@ class GridFile
     public function getCell($x, $y)
     {
         return $x >= 0 && $x < $this->getWidth() && $y >= 0 && $y < $this->getHeight() ? $this->rows[$y]{$x} : null;
-    }
-
-    /**
-     * @param $x
-     * @param $y
-     * @return boolean
-     */
-    public function isPicture($x, $y)
-    {
-        return ($value = substr($this->pictures, $y * $this->getWidth() + $x, 1)) ? $value === "1" : false;
     }
 
     public function __toString()

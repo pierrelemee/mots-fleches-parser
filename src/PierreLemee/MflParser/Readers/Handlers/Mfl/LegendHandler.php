@@ -2,9 +2,9 @@
 
 namespace PierreLemee\MflParser\Readers\Handlers\Mfl;
 
-use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
 use PierreLemee\MflParser\Exceptions\MflParserException;
 use PierreLemee\MflParser\Model\GridFile;
+use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
 
 class LegendHandler extends AbstractHandler
 {
