@@ -19,11 +19,13 @@
   ],
   "autoload": {
     "psr-0": {
-      "": "src/",
-      "PierreLemee": "src/PierreLemee"
+      "PierreLemee": "src"
     }
   },
   "require": {
     "php": ">=5.3.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "5.5.4"
   }
 }

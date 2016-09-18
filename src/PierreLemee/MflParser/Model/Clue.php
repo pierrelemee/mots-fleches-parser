@@ -52,7 +52,7 @@ class Clue implements \JsonSerializable
     }
 
     /**
-     * @return mixed
+     * @return Arrow
      */
     public function getArrow()
     {

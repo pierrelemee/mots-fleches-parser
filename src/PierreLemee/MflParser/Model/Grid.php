@@ -13,12 +13,14 @@ class Grid implements \JsonSerializable
      * @var AbstractCell[]
      */
     protected $cells;
+    protected $clues;
 
     public function __construct()
     {
         $this->width = 0;
         $this->height = 0;
         $this->cells = [];
+        $this->clues = [];
     }
 
     /**
@@ -68,6 +70,22 @@ class Grid implements \JsonSerializable
         $this->height = max($this->height, $cell->getY() + 1);
     }
 
+    /**
+     * @param Clue $clue
+     */
+    public function addClue(Clue $clue)
+    {
+        $this->clues[] = $clue;
+    }
+
+    /**
+     * @return Clue[]
+     */
+    public function getClues()
+    {
+        return $this->clues;
+    }
+
     function jsonSerialize()
     {
         return [
@@ -102,7 +120,9 @@ class Grid implements \JsonSerializable
                         throw new MflParserException($x, $y, "Unable to find definitions for $value");
                     }
                     foreach ($arrows as $arrow) {
-                        $clues[] = new Clue($gridFile->getDefinitions()[$index], self::getWord($arrow, $gridFile, $x, $y), $gridFile->getLevel($index - 1), $arrow);
+                        $clue = new Clue($gridFile->getDefinitions()[$index], self::getWord($arrow, $gridFile, $x, $y), $gridFile->getLevel($index - 1), $arrow);
+                        $clues[] =$clue;
+                        $grid->addClue($clue);
                         $index++;
                     }
                     $grid->addCell(new ClueCell($x, $y, $clues));
