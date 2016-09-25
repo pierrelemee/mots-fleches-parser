@@ -39,11 +39,11 @@ class MflParserTest extends TestCase
     {
         return [
             [__DIR__ . '/grids/grid_ok.mfj', 47, 1, [
-                    36 => ['IL PEUT MONTER AVEC LA COLÈRE', 'TON', 1, 'bottom']
+                    36 => ['IL PEUT MONTER, AVEC LA COLÈRE', 'TON', 1, 'bottom']
                 ]
             ],
             [__DIR__ . '/grids/grid_ok.mfl', 47, 1, [
-                    36 => ['IL PEUT MONTER AVEC LA COLÈRE', 'TON', 2, 'bottom']
+                    36 => ['IL PEUT MONTER, AVEC LA COLÈRE', 'TON', 2, 'bottom']
                 ]
             ]
         ];

@@ -7,6 +7,11 @@ use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
 
 class DefinitionsHandler extends AbstractHandler
 {
+    const STATE_UKNOWN = 0;
+    const STATE_BODY = 1;
+    const STATE_DEFINITION = 2;
+    const STATE_DEFINITION_PART = 3;
+
     protected function getKeyPattern()
     {
         return "/definitions/";
@@ -14,26 +19,41 @@ class DefinitionsHandler extends AbstractHandler
 
     public function processEntry($key, $value, GridFile $file)
     {
+        $state = self::STATE_UKNOWN;
         $index = 0;
-        $row = substr($value, 1, strlen($value) - 2);
-        $lbracket = strpos($row, "[");
-        $rbracket = strpos($row, "]");
-        while (false !== $lbracket && false !== $rbracket) {
-            $parts = array_map(function ($d) {
-                return substr($d, 1, strlen($d) - 2);
-            }, explode(",", substr($row, $lbracket + 1, $rbracket - $lbracket - 1)));
-            $definition = "";
-            for ($i = 0; $i < sizeof($parts); $i++) {
-                $definition .= $parts[$i];
-                if ($i < (sizeof($parts) - 1) && ord($parts[$i]{strlen($parts[$i]) - 1}) !== 147) {
-                    $definition .= " ";
-                }
+        $definition = "";
+
+        foreach (str_split(trim($value)) as $char) {
+            switch ($char) {
+                case '[':
+                    if ($state === self::STATE_UKNOWN) {
+                        $state = self::STATE_BODY;
+                    } else if ($state === self::STATE_BODY) {
+                        $state = self::STATE_DEFINITION;
+                    }
+                    break;
+                case ']':
+                    if ($state === self::STATE_BODY) {
+                        $state = self::STATE_UKNOWN;
+                    } else if ($state === self::STATE_DEFINITION) {
+                        $file->addDefinition(trim($definition), ++$index);
+                        $definition = "";
+                        $state = self::STATE_BODY;
+                    }
+                    break;
+                case '"':
+                    if ($state === self::STATE_DEFINITION) {
+                        $state = self::STATE_DEFINITION_PART;
+                    } else if ($state === self::STATE_DEFINITION_PART) {
+                        $definition .= (ord($char) !== 147 ? " " : "");
+                        $state = self::STATE_DEFINITION;
+                    }
+                    break;
+                default:
+                    if ($state === self::STATE_DEFINITION_PART) {
+                        $definition .= $char;
+                    }
             }
-            $file->addDefinition($definition, ++$index);
-            $row = substr($row, $rbracket + 1);
-            $lbracket = strpos($row, "[");
-            $rbracket = strpos($row, "]");
         }
     }
-
 }
