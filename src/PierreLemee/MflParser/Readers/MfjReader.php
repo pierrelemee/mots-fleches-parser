@@ -81,7 +81,7 @@ class MfjReader extends AbstractReader
                     if (null !== $handler = $this->getHandlerForKey($this->key)) {
                         $handler->processEntry($this->key, $this->value, $this->file);
                     } // TODO: throw exception otherwise in strict mode
-                    $this->buffer = "";
+                    $this->buffer = $this->key = $this->value = "";
                 } else {
                     $this->buffer .= $character;
                 }
