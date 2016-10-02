@@ -57,7 +57,6 @@ class MflParser
                     $y++;
                 }
                 $reader->readGridFileCharacter($file, $character);
-
             }
         } catch (Exception $e) {
             //echo $e->getTraceAsString();

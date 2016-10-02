@@ -58,10 +58,14 @@ class MfjReader extends AbstractReader
                 $this->state = self::STATE_KEY;
                     break;
             case ":":
-                $this->key = $this->buffer;
-                $this->buffer = "";
-                $this->state = self::STATE_VALUE;
-                    break;
+                if ($this->state === self::STATE_KEY) {
+                    $this->key = $this->buffer;
+                    $this->buffer = "";
+                    $this->state = self::STATE_VALUE;
+                } else {
+                    $this->buffer .= $character;
+                }
+                break;
             case "[":
                 if ($this->state >= self::STATE_VALUE) {
                     $this->state++;
@@ -81,7 +85,7 @@ class MfjReader extends AbstractReader
                     if (null !== $handler = $this->getHandlerForKey($this->key)) {
                         $handler->processEntry($this->key, $this->value, $this->file);
                     } // TODO: throw exception otherwise in strict mode
-                    $this->buffer = $this->key = $this->value = "";
+                    $this->buffer = $this->value = $this->key = "";
                 } else {
                     $this->buffer .= $character;
                 }
