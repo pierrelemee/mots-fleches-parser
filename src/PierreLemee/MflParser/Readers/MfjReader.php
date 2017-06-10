@@ -26,7 +26,6 @@ class MfjReader extends AbstractReader
         return false;
     }
 
-
     public function getHandlers()
     {
         if (null === self::$HANDLERS) {

@@ -81,6 +81,7 @@ class MflParser
     {
         switch(strtolower($file->getExtension())) {
             case "mfl":
+            case "txt":
                 return new MflReader($file);
             case "mfj":
                 return new MfjReader($file);
