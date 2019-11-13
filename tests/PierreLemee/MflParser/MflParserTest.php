@@ -3,6 +3,7 @@
 namespace PierreLemee\MflParser;
 
 use PHPUnit\Framework\TestCase;
+use PierreLemee\MflParser\Exceptions\MflParserException;
 
 class MflParserTest extends TestCase
 {
@@ -46,6 +47,35 @@ class MflParserTest extends TestCase
                     36 => ['IL PEUT MONTER, AVEC LA COLÈRE', 'TON', 2, 'bottom']
                 ]
             ]
+        ];
+    }
+
+    /**
+     * @dataProvider getGridsKo
+     *
+     * @param string $filename
+     * @param string $message
+     * @param int $row
+     * @param int $column
+     */
+    public function testParserKo($filename, $message, $row = 0, $column = 0)
+    {
+        try {
+            $this->getParser()->parse($filename);
+
+            $this->fail(sprintf("Expected exception %s to be thrown", MflParserException::class));
+        } catch (MflParserException $e) {
+            $this->assertEquals(sprintf("Parsing error at row %d, column %d: %s", $row, $column, $message), $e->getMessage());
+            $this->assertEquals($row, $e->getRow());
+            $this->assertEquals($column, $e->getColumn());
+        }
+    }
+
+    public function getGridsKo()
+    {
+        return [
+            "not mfl content" => [__DIR__ . '/grids/grid_ko.mfl', "Invalid width for grid: should be greater than 0" ],
+            "not mfj content" => [__DIR__ . '/grids/grid_ko.mfj', "Invalid width for grid: should be greater than 0" ],
         ];
     }
 }

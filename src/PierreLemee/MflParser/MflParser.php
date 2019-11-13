@@ -65,6 +65,14 @@ class MflParser
             fclose($source);
         }
 
+        if ($file->getWidth() === 0) {
+            throw new MflParserException(0, 0, "Invalid width for grid: should be greater than 0");
+        }
+
+        if ($file->getHeight() === 0) {
+            throw new MflParserException(0, 0, "Invalid height for grid: should be greater than 0");
+        }
+
         if ($reader->handleDefinitionForce() && sizeof($file->getDefinitions()) !== sizeof($file->getLevels())) {
             throw new MflParserException($x, $y, sprintf("Number of definitions (%d) and levels (%d) doesn't match", sizeof($file->getDefinitions()), sizeof($file->getLevels())));
         }

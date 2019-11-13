@@ -22,7 +22,7 @@ class MflParserException extends \Exception
     {
         $this->row   = $row;
         $this->column = $column;
-        parent::__construct(sprintf("%s at row %d, column %d: %s", __CLASS__, $this->row, $this->column, $message));
+        parent::__construct(sprintf("Parsing error at row %d, column %d: %s", $this->row, $this->column, $message));
     }
 
     /**
