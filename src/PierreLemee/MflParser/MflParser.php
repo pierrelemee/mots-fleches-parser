@@ -3,98 +3,211 @@
 namespace PierreLemee\MflParser;
 
 use Exception;
-use PierreLemee\MflParser\Exceptions\MflParserException;
 use PierreLemee\MflParser\Model\Grid;
-use PierreLemee\MflParser\Model\GridFile;
+use PierreLemee\MflParser\Model\Word;
 use PierreLemee\MflParser\Readers\AbstractReader;
+use PierreLemee\MflParser\Readers\Extract\Grid as GridExtract;
 use PierreLemee\MflParser\Readers\MfjReader;
 use PierreLemee\MflParser\Readers\MflReader;
 
 class MflParser
 {
-    const STATE_UNDEFINED = 0;
-    const STATE_KEY       = 1;
-    const STATE_VALUE     = 2;
+    private static $DIRECTIONS = [
+        'a' => [ Word::DIRECTION_RIGHT ],
+        'b' => [ Word::DIRECTION_BOTTOM ],
+        'c' => [ Word::DIRECTION_RIGHT_BOTTOM ],
+        'd' => [ Word::DIRECTION_BOTTOM_RIGHT ],
+        'e' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM ],
+        'f' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM ],
+        'g' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM ],
+        'h' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM ],
+        'i' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM ],
+        'j' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM ],
+        'k' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM ],
+        'l' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM ],
+        'm' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM ],
+        'n' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM ],
+        'o' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM_RIGHT ],
+        'p' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM_RIGHT ],
+        'q' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM_RIGHT ],
+        'r' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM_RIGHT ],
+        's' => [ Word::DIRECTION_RIGHT, Word::DIRECTION_BOTTOM_RIGHT ],
+        't' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM_RIGHT ],
+        'u' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM_RIGHT ],
+        'v' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM_RIGHT ],
+        'w' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM_RIGHT ],
+        'x' => [ Word::DIRECTION_RIGHT_BOTTOM, Word::DIRECTION_BOTTOM_RIGHT ],
+        'y' => [ Word::DIRECTION_LEFT_BOTTOM],
+        'z' => [ Word::DIRECTION_LEFT_BOTTOM, Word::DIRECTION_RIGHT_BOTTOM]
+    ];
 
     /**
      * @param $filename string
      *
      * @return Grid
-     * @throws MflParserException
+     *
+     * @throws Exception
      */
-    public function parse($filename)
+    public function parseFile($filename)
     {
-        if (is_file($filename)) {
-            return Grid::fromGridFile($this->extractGridFile($filename));
+        $extract = $this
+            ->getReaderForFile($filename)
+            ->readFile($filename);
+
+        return $this->processExtract($extract);
+    }
+
+    /**
+     * @param GridExtract $extract
+     *
+     * @return Grid
+     *
+     * @throws Exception
+     */
+    protected function processExtract(GridExtract $extract)
+    {
+        $grid = new Grid();
+        $grid->setWidth($extract->width);
+        $grid->setHeight($extract->height);
+        $grid->setForce($extract->force);
+
+        if ($grid->getHeight() <= 0) {
+            throw new Exception("Invalid height for grid: should be greater than 0 ({$grid->getHeight()})");
         }
-        throw new MflParserException(0, 0, sprintf("No such file '%s'", $filename));
+
+        if ($grid->getWidth() <= 0) {
+            throw new Exception("Invalid width for grid: should be greater than 0 ({$grid->getWidth()})");
+        }
+
+        if ($grid->getHeight() !== count($extract->cells) || $grid->getWidth() !== count($extract->cells[0])) {
+            throw new Exception("Dimensions for grid doesn't match with cells matrix");
+        }
+
+        for ($y = 0; $y < $extract->height; $y++) {
+            for ($x = 0; $x < $extract->width; $x++) {
+                if ($extract->isDefinitionCell($x, $y) && isset(self::$DIRECTIONS[$cell = $extract->getDefinitionCell($x, $y)])) {
+                    $words = $this->findWords($extract, $x, $y, self::$DIRECTIONS[$cell]);
+
+                    foreach ($words as $word) {
+                        $word
+                            ->setDefinition($extract->definitions[$grid->countWords()])
+                            ->setForce($extract->forces[$grid->countWords()]);
+                        $grid->addWord($word);
+
+                        echo "Added word ({$word->getX()}:{$word->getY()}:{$word->getDirection()}) {$word->getDefinition()} => {$word->getContent()} to grid\n";
+                    }
+                }
+            }
+        }
+
+        if ($count = count($grid->getWords()) !== ($expected = count($extract->definitions))) {
+            throw new Exception("Number of words extracted ({$count} doesn't match definitions number ({$count})");
+        }
+
+        return $grid;
+    }
+
+    /**
+     * @param GridExtract $extract
+     * @param int $x
+     * @param int $y
+     * @param string[] $directions
+     *
+     * @return Word[]
+     */
+    protected function findWords(GridExtract $extract, int $x, int $y, array $directions): array
+    {
+        $words = [];
+        foreach ($directions as $direction) {
+            $content = null;
+            switch ($direction) {
+                case Word::DIRECTION_RIGHT_BOTTOM:
+                    $content = $this->findWordVertical($extract, $x + 1, $y);
+                    break;
+                case Word::DIRECTION_RIGHT:
+                    $content = $this->findWordHorizontal($extract, $x + 1, $y);
+                    break;
+                case Word::DIRECTION_BOTTOM:
+                    $content = $this->findWordVertical($extract, $x, $y + 1);
+                    break;
+                case Word::DIRECTION_BOTTOM_RIGHT:
+                    $content = $this->findWordHorizontal($extract, $x, $y + 1);
+                    break;
+            }
+
+            if (null !== $content && strlen($content) > 1) {
+                $words[] = Word::create($content)
+                    ->setX($x)
+                    ->setY($y)
+                    ->setDirection($direction);
+            }
+        }
+
+        return $words;
+    }
+
+    /**
+     * @param GridExtract $extract
+     * @param int $x
+     * @param int $y
+     *
+     * @return string
+     */
+    protected function findWordHorizontal(GridExtract $extract, int $x, int $y): string
+    {
+        $content = '';
+        if (null !== ($cell = $extract->getLetterCell($x, $y)) && null === $extract->getLetterCell($x - 1, $y)) {
+            $index = 0;
+
+            do {
+                $content .= $cell;
+                $cell = $extract->getLetterCell($x + (++$index), $y );
+            } while (null !== $cell);
+        }
+
+        return $content;
+    }
+
+    /**
+     * @param GridExtract $extract
+     * @param int $x
+     * @param int $y
+     *
+     * @return string
+     */
+    protected function findWordVertical(GridExtract $extract, int $x, int $y): string
+    {
+        $content = '';
+        if (null !== ($cell = $extract->getLetterCell($x, $y)) && null === $extract->getLetterCell($x, $y - 1)) {
+            $index = 0;
+            do {
+                $content .= $cell;
+                $cell = $extract->getLetterCell($x, $y + (++$index));
+            } while (null !== $cell);
+        }
+
+        return $content;
     }
 
     /**
      * @param string $filename
-     * @return GridFile
-     * @throws MflParserException
-     */
-    protected function extractGridFile($filename)
-    {
-        $file = new GridFile($filename);
-
-        $source = $file->getFileHandler();
-        $reader = self::getReaderForFile($file);
-
-        if (null === $reader) {
-
-        }
-        $x = 1;
-        $y = 1;
-
-        try {
-            while (($character = fgetc($source)) !== false) {
-                if ($character === "\n") {
-                    $x++;
-                    $y = 1;
-                } else {
-                    $y++;
-                }
-                $reader->readGridFileCharacter($file, $character);
-            }
-        } catch (Exception $e) {
-            //echo $e->getTraceAsString();
-            throw new MflParserException($x, $y, $e->getMessage());
-        } finally {
-            fclose($source);
-        }
-
-        if ($file->getWidth() === 0) {
-            throw new MflParserException(0, 0, "Invalid width for grid: should be greater than 0");
-        }
-
-        if ($file->getHeight() === 0) {
-            throw new MflParserException(0, 0, "Invalid height for grid: should be greater than 0");
-        }
-
-        if ($reader->handleDefinitionForce() && sizeof($file->getDefinitions()) !== sizeof($file->getLevels())) {
-            throw new MflParserException($x, $y, sprintf("Number of definitions (%d) and levels (%d) doesn't match", sizeof($file->getDefinitions()), sizeof($file->getLevels())));
-        }
-        return $file;
-    }
-
-    /**
-     * @param GridFile $file
      *
      * @return AbstractReader
-     * @throws MflParserException
+     *
+     * @throws Exception
      */
-    private static function getReaderForFile(GridFile $file)
+    protected function getReaderForFile(string $filename)
     {
-        switch(strtolower($file->getExtension())) {
+        $extension = strtolower(($index = strrpos(basename($filename), ".")) ? substr(basename($filename), $index + 1) : basename($filename));
+
+        switch(strtolower($extension)) {
             case "mfl":
             case "txt":
-                return new MflReader($file);
+                return new MflReader();
             case "mfj":
-                return new MfjReader($file);
+                return new MfjReader();
         }
 
-        throw new MflParserException(0, 0, "Can't find appropriate reader for extension {$file->getExtension()}");
+        throw new Exception("No suitable reader can be found for file {$filename}");
     }
 }
