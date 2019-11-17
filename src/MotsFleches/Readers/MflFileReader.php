@@ -26,7 +26,7 @@ class MflFileReader extends AbstractFileReader
             )
         );
 
-        if (empty($row)) {
+        if (count($row) <= 1) {
             throw new Exception("Unable to extract data from mfl file {$filename}");
         }
 

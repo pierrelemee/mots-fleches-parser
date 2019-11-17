@@ -20,7 +20,7 @@ class MfjFileReader extends AbstractFileReader
             throw new Exception("Missing command 'node', required to parse *.mfj files");
         }
 
-        if (!is_array($row = json_decode(shell_exec("node {$this->script} {$filename}"), true))) {
+        if (!is_array($row = json_decode(shell_exec("node {$this->script} {$filename} 2>/dev/null"), true))) {
             throw new Exception("Unable to extract data from mfj file {$filename}");
         }
 

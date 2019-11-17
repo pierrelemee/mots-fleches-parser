@@ -74,6 +74,14 @@ class Grid
     }
 
     /**
+     * @return Word
+     */
+    public function getWord(int $index): ?Word
+    {
+        return @$this->words[$index] ?? null;
+    }
+
+    /**
      * @return Word[]
      */
     public function getWords(): array

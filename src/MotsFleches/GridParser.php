@@ -72,11 +72,11 @@ class GridParser
         $grid->setForce($extract->force);
 
         if ($grid->getHeight() <= 0) {
-            throw new Exception("Invalid height for grid: should be greater than 0 ({$grid->getHeight()})");
+            throw new Exception("Invalid height for grid: should be greater than 0");
         }
 
         if ($grid->getWidth() <= 0) {
-            throw new Exception("Invalid width for grid: should be greater than 0 ({$grid->getWidth()})");
+            throw new Exception("Invalid width for grid: should be greater than 0");
         }
 
         if ($grid->getHeight() !== count($extract->cells) || $grid->getWidth() !== count($extract->cells[0])) {
