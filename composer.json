@@ -1,5 +1,5 @@
 {
-  "name": "pierrelemee/mfl-parser",
+  "name": "pierrelemee/mots-fleches-parser",
   "type": "library",
   "description": "MFL file parser",
   "keywords" : [
@@ -8,7 +8,7 @@
   ],
   "homepage": "http://www.pierrelemee.fr",
   "license": "GPL-3.0+",
-  "version": "dev-feat-version-2",
+  "version": "2.0-dev",
   "authors": [
     {
       "name": "Pierre Lemée",
