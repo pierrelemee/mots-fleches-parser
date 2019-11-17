@@ -5,10 +5,10 @@ namespace PierreLemee\MflParser\Model;
 class Arrow
 {
     const BOTTOM       = "bottom";
-    const RIGHT_BOTTOM = "rightbottom";
-    const LEFT_BOTTOM  = "leftbottom";
+    const RIGHT_BOTTOM = "right_bottom";
+    const LEFT_BOTTOM  = "left_bottom";
     const RIGHT        = "right";
-    const BOTTOM_RIGHT = "bottomright";
+    const BOTTOM_RIGHT = "bottom_right";
 
     protected $label;
     protected $mapping;

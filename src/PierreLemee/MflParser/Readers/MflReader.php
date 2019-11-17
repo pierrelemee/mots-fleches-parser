@@ -2,60 +2,61 @@
 
 namespace PierreLemee\MflParser\Readers;
 
-use PierreLemee\MflParser\Model\GridFile;
-use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
+use Exception;
+use PierreLemee\MflParser\Readers\Extract\Grid;
 
 class MflReader extends AbstractReader
 {
-    private static $HANDLERS;
-
-    public function __construct(GridFile $file)
+    /**
+     * @param string $filename
+     *
+     * @return Grid
+     *
+     * @throws Exception
+     */
+    protected function doRead(string $filename): Grid
     {
-        parent::__construct($file);
-    }
+        $row = array_merge(
+            ...array_map(
+                function ($element) {
+                    $parts = explode('=', $element);
+                    return count($parts) === 2 ? [$parts[0] => $parts[1]] : [];
+                },
+                explode('&', file_get_contents($filename) ?? '') ?? []
+            )
+        );
 
-    public function handleDefinitionForce()
-    {
-        return true;
-    }
-
-    public function getHandlers()
-    {
-        if (null === self::$HANDLERS) {
-            $this->initializeHandlers();
+        if (empty($row)) {
+            throw new Exception("Unable to extract data from mfl file {$filename}");
         }
-        return self::$HANDLERS;
-    }
 
-    protected function initializeHandlers()
-    {
-        // Handlers initialization
-        self::$HANDLERS = [];
-        foreach (scandir(__DIR__ . "/Handlers/Mfl/") as $file) {
-            if (preg_match("/Handler\\.php$/", $file)) {
-                include_once __DIR__ . "/Handlers/Mfl/" . $file;
-                $classname = "\\PierreLemee\\MflParser\\Readers\\Handlers\\Mfl\\" . preg_replace("/Handler\\.php$/", "Handler", $file);
-                $class = new $classname;
-                if ($class instanceof AbstractHandler) {
-                    self::$HANDLERS[] = $class;
-                }
+        $extract = new Grid();
+        $extract->name = isset($row['titre']) ? preg_replace('/\\n/', '', $row['titre']) : null;
+        $extract->legend = isset($row['legende']) ? preg_replace('/\\n/', '', $row['legende']) : null;
+        $forces = isset($row['niveau']) ? preg_replace('/\\n/', '', $row['niveau']) : '';
+        foreach (str_split($forces) as $force) {
+            if (null === $extract->force || $extract->force < $force) {
+                $extract->force = $force;
             }
+
+            $extract->forces[] = $force;
         }
+
+        $index = 1;
+        while (isset($row["lign$index"])) {
+            $extract->cells[] = str_split(preg_replace('/\\n/', '', $row["lign$index"]));
+            $index++;
+        }
+        $extract->width = count(@$extract->cells[0] ?? []);
+        $extract->height = count($extract->cells);
+
+        $index = 1;
+        while (isset($row["tx$index"])) {
+            $extract->definitions[] = preg_replace('/– /', '', preg_replace('/\\n/', ' ', $row["tx$index"]));
+            $index++;
+        }
+
+        return $extract;
     }
 
-    public function readGridFileCharacter($file, $character)
-    {
-        if ($character === "=") {
-            $this->key = $this->buffer;
-            $this->buffer = "";
-        } else if ($character === "&") {
-            $this->value = $this->buffer;
-            if (null !== $handler = $this->getHandlerForKey($this->key)) {
-                $handler->processEntry($this->key, $this->value, $this->file);
-            } // TODO: throw exception otherwise in strict mode
-            $this->buffer = "";
-        } else {
-            $this->buffer .= $character;
-        }
-    }
 }

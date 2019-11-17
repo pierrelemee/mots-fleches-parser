@@ -2,48 +2,33 @@
 
 namespace PierreLemee\MflParser\Readers;
 
-use PierreLemee\MflParser\Model\GridFile;
-use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
+use PierreLemee\MflParser\Readers\Extract\Grid;
+use Exception;
 
 abstract class AbstractReader
 {
-    protected $key;
-    protected $value;
-    protected $buffer;
     /**
-     * @var GridFile
+     * @param string $filename
+     *
+     * @return Grid
+     *
+     * @throws Exception
      */
-    protected $file;
-
-    public function __construct(GridFile $file)
+    public function readFile(string $filename): Grid
     {
-        $this->buffer = "";
-        $this->file = $file;
-    }
-
-    /**
-     * @return boolean
-     */
-    public abstract function handleDefinitionForce();
-
-    /**
-     * @return AbstractHandler[]
-     */
-    public abstract function getHandlers();
-
-    /**
-     * @param $key
-     * @return AbstractHandler
-     */
-    public function getHandlerForKey($key)
-    {
-        foreach ($this->getHandlers() as $handler) {
-            if ($handler->matches($key)) {
-                return $handler;
-            }
+        if (is_file($filename)) {
+            return $this->doRead($filename);
         }
-        return null;
+
+        throw new Exception( "No such file '{$filename}'");
     }
 
-    public abstract function readGridFileCharacter($file, $character);
+    /**
+     * @param string $filename
+     *
+     * @return Grid
+     *
+     * @throws Exception
+     */
+    protected abstract function doRead(string $filename): Grid;
 }

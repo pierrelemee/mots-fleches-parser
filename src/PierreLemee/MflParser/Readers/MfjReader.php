@@ -2,100 +2,53 @@
 
 namespace PierreLemee\MflParser\Readers;
 
-use PierreLemee\MflParser\Model\GridFile;
-use PierreLemee\MflParser\Readers\Handlers\AbstractHandler;
+use PierreLemee\MflParser\Readers\Extract\Grid;
+use Exception;
 
 class MfjReader extends AbstractReader
 {
-    private static $HANDLERS;
+    protected $script;
 
-    const STATE_UNKNOWN = 0;
-    const STATE_KEY = 1;
-    const STATE_VALUE = 2;
-
-    protected $state;
-
-    public function __construct(GridFile $file)
+    public function __construct()
     {
-        parent::__construct($file);
-        $this->state = self::STATE_UNKNOWN;
+        $this->script = realpath(__DIR__ . '/scripts/grid_data_extract.js');
+        var_dump($this->script);
     }
 
-    public function handleDefinitionForce()
+    public function doRead(string $filename): Grid
     {
-        return false;
-    }
-
-    public function getHandlers()
-    {
-        if (null === self::$HANDLERS) {
-            $this->initializeHandlers();
+        if (0 !== $this->testCommand('which node') && false !== $this->script) {
+            throw new Exception("Missing command 'node', required to parse *.mfj files");
         }
-        return self::$HANDLERS;
+
+        if (!is_array($row = json_decode(shell_exec("node {$this->script} {$filename}"), true))) {
+            throw new Exception("Unable to extract data from mfj file {$filename}");
+        }
+
+        $extract = new Grid();
+        $extract->name = @$row['title'] ?? null;
+        $extract->legend = @$row['legende'] ?? null;
+        $extract->cells = array_map('str_split', $row['grille']);
+        $extract->height = @$row['nbcaseshauteur'] ?? 0;
+        $extract->width = @$row['nbcaseslargeur'] ?? 0;
+        $extract->definitions = array_map(
+            function ($parts) {
+                return preg_replace('/– /', "", implode(' ', $parts));
+            },
+            $row['definitions']
+        );
+        $extract->forces = array_fill(0, count($extract->definitions), $extract->force);
+
+        return $extract;
     }
 
-    protected function initializeHandlers()
+    /**
+     * @param $command
+     *
+     * @return int
+     */
+    protected function testCommand($command)
     {
-        // Handlers initialization
-        self::$HANDLERS = [];
-        foreach (scandir(__DIR__ . "/Handlers/Mfj/") as $file) {
-            if (preg_match("/Handler\\.php$/", $file)) {
-                include_once __DIR__ . "/Handlers/Mfj/" . $file;
-                $classname = "\\PierreLemee\\MflParser\\Readers\\Handlers\\Mfj\\" . preg_replace("/Handler\\.php$/", "Handler", $file);
-                $class = new $classname;
-                if ($class instanceof AbstractHandler) {
-                    self::$HANDLERS[] = $class;
-                }
-            }
-        }
-    }
-
-    public function readGridFileCharacter($file, $character)
-    {
-        switch ($character) {
-            case "{":
-                $this->state = self::STATE_KEY;
-                    break;
-            case ":":
-                if ($this->state === self::STATE_KEY) {
-                    $this->key = $this->buffer;
-                    $this->buffer = "";
-                    $this->state = self::STATE_VALUE;
-                } else {
-                    $this->buffer .= $character;
-                }
-                break;
-            case "[":
-                if ($this->state >= self::STATE_VALUE) {
-                    $this->state++;
-                }
-                $this->buffer .= $character;
-                break;
-            case "]":
-                if ($this->state >= self::STATE_VALUE) {
-                    $this->state--;
-                }
-                $this->buffer .= $character;
-                break;
-            case ",":
-                if ($this->state === self::STATE_VALUE) {
-                    $this->state = self::STATE_KEY;
-                    $this->value = $this->buffer;
-                    if (null !== $handler = $this->getHandlerForKey($this->key)) {
-                        $handler->processEntry($this->key, $this->value, $this->file);
-                    } // TODO: throw exception otherwise in strict mode
-                    $this->buffer = $this->value = $this->key = "";
-                } else {
-                    $this->buffer .= $character;
-                }
-                break;
-            case "}":
-                $this->state = self::STATE_UNKNOWN;
-                break;
-            default:
-                if (!in_array($character, ["\r", "\t", "\n"]) && $this->state !== self::STATE_UNKNOWN) {
-                    $this->buffer .= $character;
-                }
-        }
+        return (int) shell_exec("$command > /dev/null 2>&1; echo $?");
     }
 }

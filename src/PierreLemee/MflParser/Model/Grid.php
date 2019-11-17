@@ -4,39 +4,57 @@ namespace PierreLemee\MflParser\Model;
 
 use PierreLemee\MflParser\Exceptions\MflParserException;
 
-class Grid implements \JsonSerializable
+class Grid
 {
     protected $width;
     protected $height;
     protected $force;
     /**
-     * @var AbstractCell[]
+     * @var Word[]
      */
-    protected $cells;
-    protected $clues;
+    protected $words;
 
     public function __construct()
     {
         $this->width = 0;
         $this->height = 0;
-        $this->cells = [];
-        $this->clues = [];
+        $this->words = [];
     }
 
     /**
      * @return int
      */
-    public function getWidth()
+    public function getWidth(): int
     {
         return $this->width;
     }
 
     /**
+     * @param int $width
+     * @return Grid
+     */
+    public function setWidth(int $width): Grid
+    {
+        $this->width = $width;
+        return $this;
+    }
+
+    /**
      * @return int
      */
-    public function getHeight()
+    public function getHeight(): int
     {
         return $this->height;
+    }
+
+    /**
+     * @param int $height
+     * @return Grid
+     */
+    public function setHeight(int $height): Grid
+    {
+        $this->height = $height;
+        return $this;
     }
 
     /**
@@ -49,104 +67,39 @@ class Grid implements \JsonSerializable
 
     /**
      * @param mixed $force
+     * @return Grid
      */
     public function setForce($force)
     {
         $this->force = $force;
+        return $this;
     }
 
     /**
-     * @return AbstractCell[]
+     * @return Word[]
      */
-    public function getCells()
+    public function getWords(): array
     {
-        return $this->cells;
-    }
-
-    public function addCell(AbstractCell $cell)
-    {
-        $this->cells[] = $cell;
-        $this->width = max($this->width, $cell->getX() + 1);
-        $this->height = max($this->height, $cell->getY() + 1);
+        return $this->words;
     }
 
     /**
-     * @param Clue $clue
+     * @return int
      */
-    public function addClue(Clue $clue)
+    public function countWords(): int
     {
-        $this->clues[] = $clue;
+        return count($this->words);
     }
 
     /**
-     * @return Clue[]
-     */
-    public function getClues()
-    {
-        return $this->clues;
-    }
-
-    function jsonSerialize()
-    {
-        return [
-            'force'  => $this->force,
-            'width'  => $this->width,
-            'height' => $this->height,
-            'cells'  => $this->cells
-        ];
-    }
-
-    /**
-     * @param GridFile $gridFile
-     * @throws MflParserException
+     * @param Word $word
+     *
      * @return Grid
      */
-    public static function fromGridFile(GridFile $gridFile)
+    public function addWord(Word $word): Grid
     {
-        $grid = new Grid();
-        $grid->setForce($gridFile->getForce());
-        $index = 1;
+        $this->words[] = $word;
 
-        for ($y = 0; $y < $gridFile->getHeight(); $y++) {
-            for ($x = 0; $x < $gridFile->getWidth(); $x++) {
-                $value = $gridFile->getCell($x, $y);
-                if ($gridFile->isPicture($x, $y)) {
-                    $grid->addCell(new PictureCell($x, $y));
-                }
-                else if ($value === strtolower($value)) {
-                    $clues = [];
-                    $arrows = Arrow::getArrows($value);
-                    if (sizeof($arrows) == 0) {
-                        throw new MflParserException($x, $y, "Unable to find definitions for $value");
-                    }
-                    foreach ($arrows as $arrow) {
-                        $clue = new Clue($gridFile->getDefinitions()[$index], self::getWord($arrow, $gridFile, $x, $y), $gridFile->getLevel($index - 1), $arrow);
-                        $clues[] =$clue;
-                        $grid->addClue($clue);
-                        $index++;
-                    }
-                    $grid->addCell(new ClueCell($x, $y, $clues));
-                } else {
-                    $grid->addCell(new LetterCell($x, $y, $value, isset($gridFile->getDashes()[$x * sizeof($gridFile->getRows()[0]) + $y + 1]) ? $gridFile->getDashes()[$x * sizeof($gridFile->getRows()[0]) + $y + 1] : []));
-                }
-
-            }
-        }
-        return $grid;
-    }
-
-    private static function getWord(Arrow $arrow, GridFile $gridFile, $xStart, $yStart)
-    {
-        $word = "";
-        $cell = $arrow->firstCell($xStart, $yStart);
-        list($x, $y) = $cell;
-        $value = $gridFile->getCell($x, $y);
-        while ($x < $gridFile->getWidth() && $y < $gridFile->getHeight() && $value != strtolower($value)) {
-            $word .= $value;
-            $cell = $arrow->nextCell($x, $y);
-            list($x, $y) = $cell;
-            $value = $gridFile->getCell($x, $y);
-        }
-        return $word;
+        return $this;
     }
 }
