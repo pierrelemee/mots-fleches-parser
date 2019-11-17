@@ -93,15 +93,13 @@ class MflParser
                             ->setDefinition($extract->definitions[$grid->countWords()])
                             ->setForce($extract->forces[$grid->countWords()]);
                         $grid->addWord($word);
-
-                        echo "Added word ({$word->getX()}:{$word->getY()}:{$word->getDirection()}) {$word->getDefinition()} => {$word->getContent()} to grid\n";
                     }
                 }
             }
         }
 
-        if ($count = count($grid->getWords()) !== ($expected = count($extract->definitions))) {
-            throw new Exception("Number of words extracted ({$count} doesn't match definitions number ({$count})");
+        if (($count = count($grid->getWords())) !== ($expected = count($extract->definitions))) {
+            throw new Exception("Number of words extracted ({$count} doesn't match definitions number ({$expected})");
         }
 
         return $grid;

@@ -12,7 +12,6 @@ class MfjReader extends AbstractReader
     public function __construct()
     {
         $this->script = realpath(__DIR__ . '/scripts/grid_data_extract.js');
-        var_dump($this->script);
     }
 
     public function doRead(string $filename): Grid
@@ -28,6 +27,7 @@ class MfjReader extends AbstractReader
         $extract = new Grid();
         $extract->name = @$row['title'] ?? null;
         $extract->legend = @$row['legende'] ?? null;
+        $extract->force = @$row['force'] ?? 1;
         $extract->cells = array_map('str_split', $row['grille']);
         $extract->height = @$row['nbcaseshauteur'] ?? 0;
         $extract->width = @$row['nbcaseslargeur'] ?? 0;

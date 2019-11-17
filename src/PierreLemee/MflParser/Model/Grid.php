@@ -2,8 +2,6 @@
 
 namespace PierreLemee\MflParser\Model;
 
-use PierreLemee\MflParser\Exceptions\MflParserException;
-
 class Grid
 {
     protected $width;

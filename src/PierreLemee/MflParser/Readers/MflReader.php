@@ -52,7 +52,7 @@ class MflReader extends AbstractReader
 
         $index = 1;
         while (isset($row["tx$index"])) {
-            $extract->definitions[] = preg_replace('/– /', '', preg_replace('/\\n/', ' ', $row["tx$index"]));
+            $extract->definitions[] = preg_replace('/,$/', '', preg_replace('/– /', '', preg_replace('/\\n/', ' ', $row["tx$index"])));
             $index++;
         }
 
