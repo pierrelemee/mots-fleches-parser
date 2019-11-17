@@ -1,16 +1,16 @@
 <?php
 
-namespace PierreLemee\MflParser;
+namespace PierreLemee\MotsFleches;
 
 use Exception;
-use PierreLemee\MflParser\Model\Grid;
-use PierreLemee\MflParser\Model\Word;
-use PierreLemee\MflParser\Readers\AbstractReader;
-use PierreLemee\MflParser\Readers\Extract\Grid as GridExtract;
-use PierreLemee\MflParser\Readers\MfjReader;
-use PierreLemee\MflParser\Readers\MflReader;
+use PierreLemee\MotsFleches\Model\Grid;
+use PierreLemee\MotsFleches\Model\Word;
+use PierreLemee\MotsFleches\Readers\AbstractFileReader;
+use PierreLemee\MotsFleches\Readers\Extract\Grid as GridExtract;
+use PierreLemee\MotsFleches\Readers\MfjFileReader;
+use PierreLemee\MotsFleches\Readers\MflFileReader;
 
-class MflParser
+class GridParser
 {
     private static $DIRECTIONS = [
         'a' => [ Word::DIRECTION_RIGHT ],
@@ -190,7 +190,7 @@ class MflParser
     /**
      * @param string $filename
      *
-     * @return AbstractReader
+     * @return AbstractFileReader
      *
      * @throws Exception
      */
@@ -201,9 +201,9 @@ class MflParser
         switch(strtolower($extension)) {
             case "mfl":
             case "txt":
-                return new MflReader();
+                return new MflFileReader();
             case "mfj":
-                return new MfjReader();
+                return new MfjFileReader();
         }
 
         throw new Exception("No suitable reader can be found for file {$filename}");

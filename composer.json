@@ -8,7 +8,7 @@
   ],
   "homepage": "http://www.pierrelemee.fr",
   "license": "GPL-3.0+",
-  "version": "2.0-dev",
+  "version": "2.0.1",
   "authors": [
     {
       "name": "Pierre Lemée",
@@ -18,8 +18,8 @@
     }
   ],
   "autoload": {
-    "psr-0": {
-      "PierreLemee": "src"
+    "psr-4": {
+      "PierreLemee\\": "src"
     }
   },
   "require": {

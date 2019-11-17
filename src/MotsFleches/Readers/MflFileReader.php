@@ -1,11 +1,11 @@
 <?php
 
-namespace PierreLemee\MflParser\Readers;
+namespace PierreLemee\MotsFleches\Readers;
 
 use Exception;
-use PierreLemee\MflParser\Readers\Extract\Grid;
+use PierreLemee\MotsFleches\Readers\Extract\Grid;
 
-class MflReader extends AbstractReader
+class MflFileReader extends AbstractFileReader
 {
     /**
      * @param string $filename

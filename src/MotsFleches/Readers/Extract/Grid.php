@@ -1,6 +1,6 @@
 <?php
 
-namespace PierreLemee\MflParser\Readers\Extract;
+namespace PierreLemee\MotsFleches\Readers\Extract;
 
 class Grid
 {

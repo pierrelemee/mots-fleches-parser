@@ -1,6 +1,6 @@
 <?php
 
-namespace PierreLemee\MflParser\Model;
+namespace PierreLemee\MotsFleches\Model;
 
 class Grid
 {

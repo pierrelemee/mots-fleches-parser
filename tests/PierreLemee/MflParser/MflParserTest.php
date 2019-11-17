@@ -1,9 +1,9 @@
 <?php
 
-namespace PierreLemee\MflParser;
+namespace PierreLemee\MotsFleches;
 
 use PHPUnit\Framework\TestCase;
-use PierreLemee\MflParser\Exceptions\MflParserException;
+use PierreLemee\MotsFleches\Exceptions\MflParserException;
 
 class MflParserTest extends TestCase
 {
@@ -12,7 +12,7 @@ class MflParserTest extends TestCase
     protected function getParser()
     {
         if (null === $this->parser) {
-            $this->parser = new MflParser();
+            $this->parser = new GridParser();
         }
 
         return $this->parser;
